@@ -110,6 +110,37 @@ theta_pid = solution_pid.y[0]
 solution_lqr = solve_ivp(pendulum_lqr, (t_start, t_end), y0, t_eval=t_eval)
 t_lqr = solution_lqr.t
 theta_lqr = solution_lqr.y[0]
+# Performance metrics
+def calculate_metrics(t, theta, label):
+    # Overshoot
+    overshoot = (np.max(np.abs(theta)) - np.abs(theta[0])) / np.abs(theta[0]) * 100
+    
+    # Settling time (when angle stays within 2% of target)
+    threshold = 0.02 * np.abs(theta[0])
+    settled_idx = None
+    for i in range(len(theta)-1, -1, -1):
+        if np.abs(theta[i]) > threshold:
+            settled_idx = i
+            break
+    
+    if settled_idx is not None and settled_idx < len(t)-1:
+        settling_time = t[settled_idx + 1]
+    else:
+        settling_time = t[-1]
+    
+    # Steady state error
+    steady_state = np.mean(np.abs(theta[-100:]))
+    
+    print(f"\n{label} Performance:")
+    print(f"  Settling Time:      {settling_time:.3f} seconds")
+    print(f"  Overshoot:          {overshoot:.2f}%")
+    print(f"  Steady State Error: {steady_state:.6f} radians")
+    
+    return settling_time, overshoot, steady_state
+
+# Calculate for each controller
+calculate_metrics(t_pid, theta_pid, "PID Controller")
+calculate_metrics(t_lqr, theta_lqr, "LQR Controller")
 
 # Plot all three
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5))
