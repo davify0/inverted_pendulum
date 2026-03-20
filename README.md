@@ -33,5 +33,5 @@ analyze the sim-to-real gap.
 - [ ] IEEE paper writeup
 
 ## Author
-Mechatronics Engineering student, Pan-Atlantic University, Lagos, Nigeria.
+Onyia Ifeanyi David, Mechatronics Engineering student, Pan-Atlantic University, Lagos, Nigeria.
 Year 2 of 5.
