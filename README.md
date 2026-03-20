@@ -26,8 +26,8 @@ analyze the sim-to-real gap.
 - [x] Simulation: uncontrolled pendulum
 - [x] Simulation: PID controller
 - [x] Simulation: LQR controller
-- [ ] Quantified performance metrics
-- [ ] Disturbance rejection testing
+- [x] Quantified performance metrics
+- [x] Disturbance rejection testing
 - [ ] Physical robot build
 - [ ] Sim-to-real comparison
 - [ ] IEEE paper writeup
