@@ -12,9 +12,11 @@ analyze the sim-to-real gap.
 
 ## Current Progress
 - Uncontrolled pendulum simulation complete
-- PID controller implemented and tested
+- PID controller implemented, tuned and tested
 - LQR optimal controller implemented and tested
 - Three-way comparison visualization complete
+- Performance metrics quantified (settling time, overshoot, steady state error)
+- Disturbance rejection test complete — LQR outperforms PID under external disturbance
 
 ## Tools and Environment
 - Python 3.12
