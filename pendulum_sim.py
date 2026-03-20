@@ -141,6 +141,56 @@ def calculate_metrics(t, theta, label):
 # Calculate for each controller
 calculate_metrics(t_pid, theta_pid, "PID Controller")
 calculate_metrics(t_lqr, theta_lqr, "LQR Controller")
+# Disturbance test - simulate a sudden push at t=5 seconds
+def pendulum_pid_disturbance(t, y, pid, dt):
+    theta = y[0]
+    omega = y[1]
+    
+    # Apply disturbance at t=5 seconds
+    if 4.99 < t < 5.01:
+        omega += 0.5  # sudden push
+    
+    error = 0 - theta
+    force = pid.compute(error, dt)
+    dtheta = omega
+    domega = -(g/L)*np.sin(theta) - (b/m)*omega + (force/m*L)
+    return [dtheta, domega]
+
+def pendulum_lqr_disturbance(t, y):
+    theta = y[0]
+    omega = y[1]
+    
+    # Apply disturbance at t=5 seconds
+    if 4.99 < t < 5.01:
+        omega += 0.5  # sudden push
+    
+    state = np.array([0, 0, theta, omega])
+    force = -K @ state
+    force = float(force)
+    dtheta = omega
+    domega = -(g/L)*np.sin(theta) - (b/m)*omega + (force/m*L)
+    return [dtheta, domega]
+
+# Run disturbance simulations
+pid_disturbance = PIDController(Kp=50, Ki=1, Kd=10)
+sol_pid_dist = solve_ivp(
+    lambda t, y: pendulum_pid_disturbance(t, y, pid_disturbance, dt),
+    (t_start, t_end),
+    y0,
+    t_eval=t_eval
+)
+
+sol_lqr_dist = solve_ivp(
+    pendulum_lqr_disturbance,
+    (t_start, t_end),
+    y0,
+    t_eval=t_eval
+)
+
+t_pid_dist = sol_pid_dist.t
+theta_pid_dist = sol_pid_dist.y[0]
+t_lqr_dist = sol_lqr_dist.t
+theta_lqr_dist = sol_lqr_dist.y[0]
 
 # Plot all three
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5))
@@ -168,6 +218,29 @@ ax3.set_xlabel('Time (seconds)')
 ax3.set_ylabel('Angle (radians)')
 ax3.legend()
 ax3.grid(True)
+
+plt.tight_layout()
+plt.show()
+# Disturbance test plot
+fig2, (ax4, ax5) = plt.subplots(1, 2, figsize=(14, 5))
+
+ax4.plot(t_pid_dist, theta_pid_dist, color='red', label='PID with disturbance')
+ax4.axhline(y=0, color='black', linestyle='--', label='Target')
+ax4.axvline(x=5, color='orange', linestyle=':', label='Disturbance at t=5s')
+ax4.set_title('PID - Disturbance Rejection')
+ax4.set_xlabel('Time (seconds)')
+ax4.set_ylabel('Angle (radians)')
+ax4.legend()
+ax4.grid(True)
+
+ax5.plot(t_lqr_dist, theta_lqr_dist, color='green', label='LQR with disturbance')
+ax5.axhline(y=0, color='black', linestyle='--', label='Target')
+ax5.axvline(x=5, color='orange', linestyle=':', label='Disturbance at t=5s')
+ax5.set_title('LQR - Disturbance Rejection')
+ax5.set_xlabel('Time (seconds)')
+ax5.set_ylabel('Angle (radians)')
+ax5.legend()
+ax5.grid(True)
 
 plt.tight_layout()
 plt.show()
